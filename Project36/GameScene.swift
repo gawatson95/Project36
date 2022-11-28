@@ -18,6 +18,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var player: SKSpriteNode!
     
     var scoreLabel: SKLabelNode!
+    var highScoreLabel: SKLabelNode!
     var backgroundMusic: SKAudioNode!
     var logo: SKSpriteNode!
     var gameOver: SKSpriteNode!
@@ -32,6 +33,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var score = 0 {
         didSet {
             scoreLabel.text = "SCORE: \(score)"
+            configureHighScore()
         }
     }
 
@@ -123,6 +125,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             backgroundMusic.run(SKAction.stop())
             
             player.removeFromParent()
+    
+            highScoreLabel.alpha = 1
+            
             speed = 0
         }
     }
@@ -284,5 +289,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         gameOver.position = CGPoint(x: frame.midX, y: frame.midY)
         gameOver.alpha = 0
         addChild(gameOver)
+        
+        highScoreLabel = SKLabelNode(fontNamed: "Optima-ExtraBlack")
+        highScoreLabel.fontSize = 24
+        highScoreLabel.fontColor = UIColor.black
+        highScoreLabel.text = "High Score: \(UserDefaults.standard.value(forKey: "savedScore") as? Int ?? 0)"
+        highScoreLabel.position = CGPoint(x: frame.midX, y: frame.midY - 75)
+        highScoreLabel.alpha = 0
+        addChild(highScoreLabel)
+    }
+    
+    func configureHighScore() {
+        let defaults = UserDefaults.standard
+        
+        if let savedScore = defaults.value(forKey: "savedScore") as? Int {
+            print("SAVED: \(savedScore)")
+            print(score)
+            if score > savedScore {
+                highScoreLabel.text = "NEW High Score: \(score)"
+                defaults.set(score, forKey: "savedScore")
+            } else {
+                highScoreLabel.text = "High Score: \(savedScore)"
+            }
+        } else {
+            highScoreLabel.text = "High Score: \(score)"
+            defaults.set(score, forKey: "savedScore")
+        }
     }
 }
